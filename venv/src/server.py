@@ -11,11 +11,23 @@ def threaded_client(client):
     client.send(str.encode("Welcome to server!"))
     while True:
         data = client.recv(1024)
+        print(data)
         reply = 'Server Says: ' + data.decode('utf-8')
+        
         if not data:
             break
-        connection.sendall(str.encode(reply))
-    connection.close()
+        client.sendall(str.encode(reply))
+    client.close()
+
+def serve_data(clients, data, sent_client):
+    for client in clients:
+        if client != sent_client:
+            client.send(data)
+
+def command(server):
+    com = input()
+    if com == 'q':
+        server.close()
 
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,22 +38,6 @@ server.listen(MAX_CLIENTS)
 while True:
     client, addr = server.accept()
     print('connected by', addr)
-    threading.Thread(target=threaded_client, args=(client,))
-server.close()
-
-# try:
-#     while True:
-#         client, addr = server.accept()
-#         threading.Thread(target=threaded_client, args=(client,))
-#
-# except KeyboardInterrupt:
-#     socket.close()
-
-# def send_msg():
-#     while True:
-
-def serve_data(clients, data, sent_client):
-    for client in clients:
-        if client != sent_client:
-            client.send(data)
+    threading.Thread(target=threaded_client, args=(client,)).start()
+    threading.Thread(target=command, args=(server, )).start()
 

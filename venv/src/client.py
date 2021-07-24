@@ -2,10 +2,8 @@ import socket
 import threading
 
 HOST, PORT = 'localhost' ,8080
-name = input('type your name: ')
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# sock.send(name)
+# name = input('type your name: ')
+name = 'jun'
 
 def send():
     while True:
@@ -19,15 +17,16 @@ def receive():
         print(data)
     sock.close()
 
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 sock.connect((HOST, PORT))
-# send_thread = threading.Thread(target=send, daemon=True)
-# receive_thread = threading.Thread(target=receive, daemon=True)
-# send_thread.start()
-# receive_thread.start()
+
+data = sock.recv(1024)
+
 while True:
     data = input(name + ': ')
     sock.sendall(bytes(name + ": " + data, 'utf-8'))
     response = sock.recv(1024)
     print(response.decode('utf-8'))
-sock.close()
 
+sock.close()

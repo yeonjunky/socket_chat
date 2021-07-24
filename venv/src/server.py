@@ -1,43 +1,48 @@
 import socket
 import threading
 import sys
-from _thread import start_new_thread
 
 
 HOST, PORT = 'localhost', 8080
 MAX_CLIENTS = 5
 
-def threaded_client(client):
-    client.send(str.encode("Welcome to server!"))
-    while True:
-        data = client.recv(1024)
-        print(data)
-        reply = 'Server Says: ' + data.decode('utf-8')
-        
-        if not data:
-            break
-        client.sendall(str.encode(reply))
-    client.close()
+clients = []
+msg = ""
 
-def serve_data(clients, data, sent_client):
-    for client in clients:
-        if client != sent_client:
-            client.send(data)
 
 def command(server):
     com = input()
     if com == 'q':
         server.close()
 
+def add_client_thread(server):
+    client, addr = server.accept()
+    print('connected by', addr)
+    clients.append(client)
+    threading.Thread(target=client_thread, args=(client, )).start()
+
+def client_thread(client):
+    client.send("Welcome to server!".encode('utf-8'))
+    while True:
+        data = client.recv(1024)
+        print(data.decode('utf-8'))
+        if not data:
+            break
+        msg = 'Server Says: ' + data.decode('utf-8')
+        for client in clients:
+            client.send(msg.encode('utf-8'))
+        # client.sendall(str.encode(reply))
+    client.close()
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 server.bind((HOST, PORT))
+print("Waiting for connect")
 server.listen(MAX_CLIENTS)
 
-while True:
-    client, addr = server.accept()
-    print('connected by', addr)
-    threading.Thread(target=threaded_client, args=(client,)).start()
-    threading.Thread(target=command, args=(server, )).start()
-
+try:
+    while True:
+        add_client_thread(server)
+except KeyboardInterrupt:
+    server.close()
+sys.exit()

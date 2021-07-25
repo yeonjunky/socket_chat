@@ -28,11 +28,15 @@ def client_thread(client):
         print(data.decode('utf-8'))
         if not data:
             break
-        msg = 'Server Says: ' + data.decode('utf-8')
-        for client in clients:
-            client.send(msg.encode('utf-8'))
-        # client.sendall(str.encode(reply))
+        msg = data.decode('utf-8')
+        send_msg = threading.Thread(target=send_all_clients, args=(msg, clients))
+        send_msg.start()
     client.close()
+
+def send_all_clients(msg, clients):
+    encoded_msg = msg.encode('utf-8')
+    for client in clients:
+        client.send(encoded_msg)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

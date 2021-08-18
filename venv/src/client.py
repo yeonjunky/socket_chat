@@ -17,12 +17,6 @@ def receive(sock):
         data = sock.recv(1024)
         print(data.decode('utf-8'))
 
-def send_msg(sock):
-    while True:
-        msg = input(name + ': ')
-        delete_last_line()
-        sock.send(msg.encode('utf-8'))
-
 name = input('type your name: ')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,8 +25,8 @@ sock.connect((HOST, PORT))
 
 data = sock.recv(1024)
 try:
+    threading.Thread(target=receive, args=(sock,)).start()
     while True:
-        threading.Thread(target=receive, args=(sock, )).start()
         msg = name + ': ' + input()
         if msg[len(name)+2:] == "!disconnect":
             sock.close()

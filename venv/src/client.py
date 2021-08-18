@@ -34,8 +34,12 @@ try:
     while True:
         threading.Thread(target=receive, args=(sock, )).start()
         msg = name + ': ' + input()
-        delete_last_line()
-        sock.send(msg.encode('utf-8'))
+        if msg[len(name)+2:] == "!disconnect":
+            sock.close()
+            break
+        else:
+            delete_last_line()
+            sock.send(msg.encode('utf-8'))
 except KeyboardInterrupt:
     sock.close()
 

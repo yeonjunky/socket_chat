@@ -29,11 +29,11 @@ def client_thread(client):
         if not data:
             break
         msg = data.decode('utf-8')
-        send_msg = threading.Thread(target=send_all_clients, args=(msg, clients))
-        send_msg.start()
+        send_to_all_clients(msg, clients)
+
     client.close()
 
-def send_all_clients(msg, clients):
+def send_to_all_clients(msg, clients):
     encoded_msg = msg.encode('utf-8')
     for client in clients:
         client.send(encoded_msg)
